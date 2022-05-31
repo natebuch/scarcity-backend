@@ -7,6 +7,7 @@
 ;; errors
 (define-constant err-owner-only (err u1000))
 (define-constant err-not-enough-burn-tokens (err u1001))
+(define-constant err-not-token-owner (err u1002))
 
 ;; constants
 (define-constant contract-owner tx-sender)
@@ -32,7 +33,7 @@
 ;;   )  
 ;; )
 
-(define-public (mint-nft (burn-amount uint) (recipient principal) (citycoin-contract <citycoin-token>))
+(define-public (mint (burn-amount uint) (recipient principal) (citycoin-contract <citycoin-token>))
   (let
     (
       (token-id (+ (var-get last-token-id) u1))
@@ -42,6 +43,13 @@
     (try! (nft-mint? scarcity-token token-id tx-sender))
     (contract-call? citycoin-contract burn burn-amount tx-sender)
   )  
+)
+
+(define-public (burn (id uint) (owner principal))
+  (begin
+    (asserts! (is-eq tx-sender owner) err-not-token-owner)
+    (nft-burn? scarcity-token id owner)
+  )
 )
 
 ;; private functions
