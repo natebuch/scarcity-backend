@@ -17,6 +17,10 @@ depends_on = []
 path = "contracts/mint-test-token-two.clar"
 depends_on = []
 
+[contracts.practice]
+path = "contracts/practice.clar"
+depends_on = []
+
 [contracts.scarcity-token]
 path = "contracts/scarcity-token.clar"
 depends_on = ["mint-test-token-one", "mint-test-token-two", "citycoin-token-trait"]
