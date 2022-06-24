@@ -1,10 +1,7 @@
 [project]
 name = "scarcity"
-authors = []
-description = ""
-telemetry = false
 requirements = []
-cache_dir = "/Users/mymac/.clarinet/cache"
+
 [contracts.citycoin-token-trait]
 path = "contracts/traits/citycoin-token-trait.clar"
 depends_on = []
@@ -25,15 +22,3 @@ depends_on = []
 path = "contracts/scarcity-token.clar"
 depends_on = ["mint-test-token-one", "mint-test-token-two", "citycoin-token-trait"]
 
-[repl]
-costs_version = 2
-parser_version = 2
-
-[repl.analysis]
-passes = ["check_checker"]
-
-[repl.analysis.check_checker]
-strict = false
-trusted_sender = false
-trusted_caller = false
-callee_filter = false
