@@ -8,11 +8,6 @@ plan:
     - id: 0
       transactions:
         - contract-publish:
-            contract-name: practice
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/practice.clar
-            cost: 1280
-        - contract-publish:
             contract-name: citycoin-token-trait
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: contracts/traits/citycoin-token-trait.clar
@@ -20,12 +15,12 @@ plan:
         - contract-publish:
             contract-name: mint-test-token-two
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/mint-test-token-two.clar
+            path: contracts/testing/mint-test-token-two.clar
             cost: 4780
         - contract-publish:
             contract-name: mint-test-token-one
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/mint-test-token-one.clar
+            path: contracts/testing/mint-test-token-one.clar
             cost: 4770
         - contract-publish:
             contract-name: scarcity-token

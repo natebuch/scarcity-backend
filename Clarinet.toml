@@ -7,15 +7,11 @@ path = "contracts/traits/citycoin-token-trait.clar"
 depends_on = []
 
 [contracts.mint-test-token-one]
-path = "contracts/mint-test-token-one.clar"
+path = "contracts/testing/mint-test-token-one.clar"
 depends_on = []
 
 [contracts.mint-test-token-two]
-path = "contracts/mint-test-token-two.clar"
-depends_on = []
-
-[contracts.practice]
-path = "contracts/practice.clar"
+path = "contracts/testing/mint-test-token-two.clar"
 depends_on = []
 
 [contracts.scarcity-token]
