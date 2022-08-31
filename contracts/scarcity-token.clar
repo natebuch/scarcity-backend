@@ -23,10 +23,10 @@
 
 ;; data maps and vars
 (define-data-var min-burn-amount uint u1)
-(define-data-var last-token-id uint u0)
+(define-data-var last-token-id uint u1)
 (define-data-var whitelist (list 10 principal) (list))
-(define-data-var tokenUri (optional (string-utf8 256)) (some u""))
 
+(define-map User-info principal {burnt-amount: uint, current-nft-id: (optional uint)})
 
 ;; read-only functions
 (define-read-only (is-whitelisted (asset-contract principal))
@@ -37,10 +37,6 @@
   (ok (var-get whitelist))
 )
 
-(define-read-only (get-token-uri)
-  (ok (var-get tokenUri))
-)
-
 (define-read-only (get-owner (token-id uint))
   (ok (nft-get-owner? scarcity-token token-id))
 )
@@ -49,14 +45,15 @@
   (ok (var-get last-token-id))
 )
 
-;; public functions
-;; set token URI to new value, only accessible by Auth
-(define-public (set-token-uri (newUri (optional (string-utf8 256))))
-  (begin
-    (asserts! (is-eq contract-caller contract-owner) err-unauthorized)
-    (ok (var-set tokenUri newUri))
-  )
+(define-read-only (get-user-info)
+  (ok (map-get? User-info tx-sender))
 )
+
+(define-read-only (get-min-burn-amount)
+  (ok (var-get min-burn-amount))
+)
+
+;; public functions
 (define-public (set-whitelisted (asset-contract principal) (whitelisted bool))
   (begin
     (asserts! (is-eq contract-caller contract-owner) err-unauthorized)
@@ -71,7 +68,6 @@
   )
 )
 
-;; no min amount currently set
 (define-public (set-burn-amount (amount uint))
   (begin
     (asserts! (is-eq contract-caller contract-owner) err-unauthorized)
@@ -79,22 +75,56 @@
   )
 )
 
-(define-public (mint (burn-amount uint) (recipient principal) (citycoin-contract <citycoin-token>))
+(define-public (mint-scarcity (burn-amount uint) (citycoin-contract <citycoin-token>))
   (let
     (
       (token-id (+ (var-get last-token-id) u1))
+      (user-info (map-get? User-info tx-sender))
     )
     (asserts! (is-whitelisted (contract-of citycoin-contract)) err-asset-not-whitelisted)  
     (asserts! (>= burn-amount (var-get min-burn-amount)) err-not-enough-burn-tokens)
     (var-set last-token-id token-id)
+    (match user-info response
+      (match (get current-nft-id response) response2
+        (begin 
+          (try! (burn-on-mint response2 tx-sender))
+          (map-set User-info tx-sender {burnt-amount: (+ burn-amount (get burnt-amount response)), current-nft-id: (some token-id)})
+        )
+        (map-set User-info tx-sender {burnt-amount: (+ burn-amount (get burnt-amount response)), current-nft-id: (some token-id)})
+      )
+      (map-insert User-info tx-sender {burnt-amount: burn-amount, current-nft-id: (some token-id)})
+    )
     (try! (nft-mint? scarcity-token token-id tx-sender))
     (contract-call? citycoin-contract burn burn-amount tx-sender)
   )  
 )
 
-(define-public (burn (id uint) (owner principal))
-  (begin
+;; Burns NFT and previous burn amounts
+(define-public (burn-scarcity-data (id uint))
+  (begin 
+    (asserts! (is-eq tx-sender (unwrap! (nft-get-owner? scarcity-token id) err-token-not-found)) err-not-token-owner)
+    (map-delete User-info tx-sender)
+    (nft-burn? scarcity-token id tx-sender)
+  )
+)
+
+;; Burns NFT only but keeps previous burn amounts
+(define-public (burn-scarcity-nft (id uint))
+  (let 
+    ( 
+      (amount (unwrap-panic (get burnt-amount (map-get? User-info tx-sender))))
+    )
+    (asserts! (is-eq tx-sender (unwrap! (nft-get-owner? scarcity-token id) err-token-not-found)) err-not-token-owner)
+    (map-set User-info tx-sender {burnt-amount: amount, current-nft-id: none})
+    (nft-burn? scarcity-token id tx-sender)
+  )
+)
+
+;;private functions
+(define-private (burn-on-mint (id uint) (owner principal)) 
+  (begin 
     (asserts! (is-eq owner (unwrap! (nft-get-owner? scarcity-token id) err-token-not-found)) err-not-token-owner)
     (nft-burn? scarcity-token id owner)
   )
 )
+
