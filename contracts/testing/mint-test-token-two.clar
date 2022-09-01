@@ -6,7 +6,12 @@
 (impl-trait .citycoin-token-trait.citycoin-token)
 (define-fungible-token test-token-two)
 
+(define-data-var DECIMALS uint u6))
 ;;read only
+(define-read-only (get-decimals)
+  (ok DECIMALS)
+)
+
 (define-read-only (get-name)
   (ok "test-token-two")
 )

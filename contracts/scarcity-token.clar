@@ -22,13 +22,14 @@
 (define-map whitelisted-assets principal bool)
 
 ;; data maps and vars
-(define-data-var min-burn-amount uint u1)
+(define-data-var min-burn-amount uint u1000000)
 (define-data-var last-token-id uint u1)
 (define-data-var whitelist (list 10 principal) (list))
 
 (define-map User-info principal {burnt-amount: uint, current-nft-id: (optional uint)})
 
 ;; read-only functions
+
 (define-read-only (is-whitelisted (asset-contract principal))
   (default-to false (map-get? whitelisted-assets asset-contract)) 
 )
